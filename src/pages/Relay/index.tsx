@@ -74,6 +74,13 @@ const outputModeOptions = [
   { value: 'transcode', label: '转码为 FLV' },
 ]
 
+const supportedRelayPlatforms = {
+  domestic:
+    '抖音|快手|虎牙|斗鱼|YY|B站|小红书|bigo|blued|网易CC|千度热播|猫耳FM|Look|TwitCasting|百度|微博|酷狗|花椒|流星|Acfun|畅聊|映客|音播|知乎|嗨秀|VV星球|17Live|浪Live|漂漂|六间房|乐嗨|花猫|淘宝|京东|咪咕|连接|来秀',
+  overseas:
+    'TikTok|SOOP|PandaTV|WinkTV|FlexTV|PopkonTV|TwitchTV|LiveMe|ShowRoom|CHZZK|Shopee|Youtube|Faceit|Picarto',
+}
+
 const MAX_RELAY_LOGS = 200
 
 function relayInvoke<Channel extends Parameters<typeof window.ipcRenderer.invoke>[0]>(
@@ -461,7 +468,39 @@ export default function Relay() {
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between gap-3">
-                  <Label htmlFor="relay-room-url">直播间地址</Label>
+                  <div className="flex items-center gap-2">
+                    <Label htmlFor="relay-room-url">直播间地址</Label>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            type="button"
+                            className="rounded-full text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-ring"
+                            aria-label="查看支持平台"
+                          >
+                            <CircleHelp className="h-4 w-4" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="max-w-[420px]">
+                          <div className="space-y-2 text-left text-xs leading-relaxed">
+                            <div className="font-medium text-sm">支持平台</div>
+                            <div>
+                              <span className="font-medium">国内站点：</span>
+                              <span className="break-words">
+                                {supportedRelayPlatforms.domestic}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="font-medium">海外站点：</span>
+                              <span className="break-words">
+                                {supportedRelayPlatforms.overseas}
+                              </span>
+                            </div>
+                          </div>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
                   {relayHistoryUrls.length > 0 && (
                     <span className="text-xs text-muted-foreground">
                       已保存 {relayHistoryUrls.length} 条

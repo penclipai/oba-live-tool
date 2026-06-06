@@ -100,6 +100,20 @@ export interface IpcChannels {
   // 一键发红包
   [IPC_CHANNELS.tasks.redPacket.send]: (accountId: string, duration: string) => boolean
 
+  // 转播
+  [IPC_CHANNELS.tasks.relay.start]: () => Promise<RelayServiceStatus>
+  [IPC_CHANNELS.tasks.relay.status]: (resolve?: boolean) => Promise<RelayServiceStatus>
+  [IPC_CHANNELS.tasks.relay.updateSettings]: (
+    settings: Partial<RelaySettings> & { resolve?: boolean; enable_stream?: boolean },
+  ) => Promise<RelayServiceStatus>
+  [IPC_CHANNELS.tasks.relay.control]: (action: 'start' | 'stop') => Promise<RelayServiceStatus>
+  [IPC_CHANNELS.tasks.relay.shutdown]: () => Promise<{
+    ok: boolean
+    message?: string
+    error?: string
+  }>
+  [IPC_CHANNELS.tasks.relay.openPanel]: () => Promise<boolean>
+
   // Updater
   [IPC_CHANNELS.updater.checkUpdate]: () => Promise<
     { latestVersion: string; currentVersion: string; releaseNote?: string } | undefined
@@ -154,4 +168,61 @@ export interface ElectronAPI {
       listener: (...args: Parameters<IpcChannels[Channel]>) => void,
     ) => () => void
   }
+}
+
+export interface RelaySettings {
+  room_url: string
+  quality: string
+  output_mode: 'auto' | 'hls' | 'transcode' | 'flv'
+  listen_host: string
+  port: number
+  cookie: string
+  upstream_proxy: string
+  chunk_size: number
+  transcode_preset: string
+}
+
+export interface RelayResolveResult {
+  ok: boolean
+  is_live: boolean
+  anchor_name: string
+  title: string
+  quality: string
+  flv_url: string
+  m3u8_url: string
+  selected_url: string
+  selected_type: string
+  codec: string
+  hevc: boolean
+  output_mode: string
+  error: string
+  resolved_at: number
+}
+
+export interface RelayLogEntry {
+  time: number
+  level: string
+  message: string
+}
+
+export interface RelayStatusPayload {
+  settings: RelaySettings
+  result: RelayResolveResult | null
+  active_clients: number
+  stream_enabled: boolean
+  stream_generation: number
+  source_version: number
+  uptime_seconds: number
+  obs_url: string
+  lan_urls: string[]
+  logs: RelayLogEntry[]
+}
+
+export interface RelayServiceStatus {
+  supported: boolean
+  serviceRunning: boolean
+  resourceReady: boolean
+  panelUrl: string
+  error?: string
+  data?: RelayStatusPayload
 }

@@ -44,6 +44,14 @@ export const IPC_CHANNELS = {
     redPacket: {
       send: 'tasks:redPacket:send',
     },
+    relay: {
+      start: 'tasks:relay:start',
+      status: 'tasks:relay:status',
+      updateSettings: 'tasks:relay:updateSettings',
+      control: 'tasks:relay:control',
+      shutdown: 'tasks:relay:shutdown',
+      openPanel: 'tasks:relay:openPanel',
+    },
   },
   config: {
     save: 'config:save',

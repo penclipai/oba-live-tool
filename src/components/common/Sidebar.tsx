@@ -1,5 +1,6 @@
+import { RadioTower } from 'lucide-react'
 import { NavLink } from 'react-router'
-import { abilities, autoReplyPlatforms } from '@/abilities'
+import { autoReplyPlatforms } from '@/abilities'
 import { useCurrentAutoMessage } from '@/hooks/useAutoMessage'
 import { useCurrentAutoPopUp } from '@/hooks/useAutoPopUp'
 import { useAutoReply } from '@/hooks/useAutoReply'
@@ -59,6 +60,11 @@ export default function Sidebar() {
       name: '一键发红包',
       icon: <CarbonGift className="w-5 h-5" />,
       platform: ['douyin', 'buyin'],
+    },
+    {
+      id: '/relay',
+      name: '转播',
+      icon: <RadioTower className="w-5 h-5" />,
     },
     {
       id: '/ai-chat',

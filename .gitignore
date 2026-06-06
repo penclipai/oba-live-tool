@@ -43,3 +43,6 @@ coverage/
 
 .trae
 .claude
+
+/resources/video-box/
+.omx

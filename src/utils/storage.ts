@@ -24,6 +24,7 @@ export const STORAGE_KEYS = {
   AI_CHAT: 'ai-chat-storage',
   UPDATE: 'update-storage',
   DEV_MODE: 'dev-mode-storage',
+  RELAY_HISTORY: 'relay-history-storage',
   STORAGE_VERSION: STORAGE_VERSION_KEY,
 } as const
 

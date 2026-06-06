@@ -7,6 +7,12 @@
   },
   "electronLanguages": ["zh-CN", "en-US"],
   "files": ["dist-electron", "dist"],
+  "extraResources": [
+    {
+      "from": "resources/video-box",
+      "to": "video-box"
+    }
+  ],
   "mac": {
     "artifactName": "${productName}_${version}_macos_${arch}.${ext}",
     "target": [

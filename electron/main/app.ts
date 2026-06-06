@@ -7,6 +7,7 @@ import { IPC_CHANNELS } from 'shared/ipcChannels'
 import { emitter } from './event/eventBus'
 import { updateManager } from './managers/UpdateManager'
 import { providerService } from './services/ProviderService'
+import { videoRelayService } from './services/VideoRelayService'
 import windowManager from './windowManager'
 import './ipc'
 import { createLogger } from './logger'
@@ -142,6 +143,7 @@ app
 app.on('window-all-closed', async () => {
   win = null
   accountManager.cleanup()
+  await videoRelayService.cleanup()
   if (process.platform !== 'darwin') app.quit()
 })
 

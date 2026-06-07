@@ -352,19 +352,23 @@ export default function Relay() {
         hydrateForm(updated.data.settings)
       }
       const result = updated.data?.result
+      const roomLabel = [result?.anchor_name, result?.title].filter(Boolean).join(' / ')
+      const roomInfoResolved = Boolean(updated.serviceRunning && result && roomLabel)
       const streamReady = Boolean(
         updated.serviceRunning && result?.ok && result.is_live && result.selected_url?.trim(),
       )
 
-      if (streamReady) {
+      if (roomInfoResolved) {
         const savedUrl = updated.data?.settings.room_url || form.room_url
-        const label = [updated.data?.result?.anchor_name, updated.data?.result?.title]
-          .filter(Boolean)
-          .join(' / ')
-        addRelayHistoryUrl(savedUrl, label)
+        addRelayHistoryUrl(savedUrl, roomLabel)
         setFormDirty(false)
         setCookieTouched(false)
+      }
+
+      if (streamReady) {
         toast.success('直播源已解析，OBS 可使用固定地址拉流')
+      } else if (roomInfoResolved) {
+        toast.error(result?.error || '直播间信息已保存，但当前未开播或暂无可用直播流')
       } else {
         toast.error(
           result?.error || updated.error || '直播源解析失败，请检查直播间地址、开播状态或 Cookie',

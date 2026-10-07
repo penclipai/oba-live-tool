@@ -1,5 +1,5 @@
-import { motion } from 'framer-motion'
 import { Pause, Play, RefreshCcw } from 'lucide-react'
+import { motion } from 'motion/react'
 import { memo, useId, useMemo, useState } from 'react'
 import { IPC_CHANNELS } from 'shared/ipcChannels'
 import { Badge } from '@/components/ui/badge'

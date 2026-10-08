@@ -7,6 +7,7 @@ export type RelayIndicatorState = 'idle' | 'listening' | 'active'
 const RELAY_STATUS_POLL_INTERVAL_MS = 3000
 
 function resolveRelayIndicatorState(status: RelayServiceStatus): RelayIndicatorState {
+  if (status.state === 'unknown') return 'idle'
   const result = status.data?.result
   const hasRoomInfo = Boolean(result && (result.anchor_name || result.title))
   const isActive = Boolean(

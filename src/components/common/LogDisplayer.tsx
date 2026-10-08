@@ -1,5 +1,6 @@
 import { useMemoizedFn } from 'ahooks'
 import type { LogMessage } from 'electron-log'
+import { ChevronDownIcon, ChevronUpIcon } from 'lucide-react'
 import { useCallback, useEffect, useId, useRef, useState } from 'react'
 import { IPC_CHANNELS } from 'shared/ipcChannels'
 import { Button } from '@/components/ui/button'
@@ -26,7 +27,17 @@ interface ParsedLog {
 
 const MAX_LOG_MESSAGES = 200 // 仅展示最近的 200 条日志
 
-export default function LogDisplayer() {
+interface LogDisplayerProps {
+  collapsible?: boolean
+  expanded?: boolean
+  onExpandedChange?: (expanded: boolean) => void
+}
+
+export default function LogDisplayer({
+  collapsible = false,
+  expanded = true,
+  onExpandedChange,
+}: LogDisplayerProps) {
   const [logMessages, setLogMessages] = useState<ParsedLog[]>([])
   const [autoScroll, setAutoScroll] = useState(true)
   const scrollAreaRef = useRef<HTMLDivElement>(null)
@@ -56,6 +67,11 @@ export default function LogDisplayer() {
   }
 
   useEffect(() => {
+    if (!expanded) {
+      viewportRef.current = null
+      return
+    }
+
     // 监听 ScrollArea 的 viewport 元素
     if (scrollAreaRef.current) {
       const viewport = scrollAreaRef.current.querySelector<HTMLDivElement>(
@@ -66,67 +82,115 @@ export default function LogDisplayer() {
         viewportRef.current = viewport
       }
     }
-  }, [])
+  }, [expanded])
+
+  useEffect(() => {
+    if (expanded && autoScroll && logMessages.length > 0) {
+      scrollToBottom()
+    }
+  }, [autoScroll, expanded, logMessages, scrollToBottom])
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: parseLogMessage 不影响
-  const handleLogMessage = useCallback(
-    (message: LogMessage) => {
-      const parsed = parseLogMessage(message)
-      if (parsed) {
-        setLogMessages(prev => [...prev.slice(-MAX_LOG_MESSAGES + 1), parsed])
-        if (autoScroll) {
-          scrollToBottom()
-        }
-      }
-    },
-    [autoScroll, scrollToBottom],
-  )
+  const handleLogMessage = useCallback((message: LogMessage) => {
+    const parsed = parseLogMessage(message)
+    if (parsed) {
+      setLogMessages(prev => [...prev.slice(-MAX_LOG_MESSAGES + 1), parsed])
+    }
+  }, [])
 
   useIpcListener(IPC_CHANNELS.log, handleLogMessage)
 
   const autoScrollId = useId()
+  const logContentId = useId()
+  const latestLog = logMessages.at(-1)
+  const latestError = [...logMessages]
+    .reverse()
+    .find(log => log.level === 'ERROR' || log.level === 'FATAL')
+  const canCollapse = collapsible && onExpandedChange
+
+  const toggleExpanded = () => {
+    onExpandedChange?.(!expanded)
+  }
 
   return (
     <div className="h-full flex flex-col bg-background">
       {/* 日志头部 */}
-      <div className="flex items-center justify-between px-4 py-2 border-b">
-        <div className="flex items-center gap-2">
-          <h3 className="font-medium">运行日志</h3>
-          <span className="text-xs text-muted-foreground">{logMessages.length} 条记录</span>
-        </div>
-        <div className="flex items-center gap-4">
-          {/* 自动滚动开关 */}
-          <div className="flex items-center gap-2">
-            <Switch id={autoScrollId} checked={autoScroll} onCheckedChange={setAutoScroll} />
-            <label
-              htmlFor={autoScrollId}
-              className="text-xs text-muted-foreground cursor-pointer select-none"
+      <div
+        className={cn(
+          'flex items-center justify-between px-4 border-b',
+          expanded ? 'py-2' : 'h-10',
+        )}
+      >
+        <div className="flex min-w-0 items-center gap-2">
+          <h3 className="shrink-0 font-medium">运行日志</h3>
+          <span className="shrink-0 text-xs text-muted-foreground">
+            {logMessages.length} 条记录
+          </span>
+          {!expanded && latestLog && (
+            <span
+              className="min-w-0 truncate text-xs text-muted-foreground"
+              title={latestLog.message}
             >
-              自动滚动
-            </label>
-          </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => {
-              setLogMessages([])
-              scrollToBottom()
-            }}
-            className="text-xs h-7 px-2 text-muted-foreground hover:text-destructive"
-          >
-            清空
-          </Button>
+              {latestLog.message}
+            </span>
+          )}
+          {!expanded && latestError && (
+            <span className="shrink-0 text-xs font-medium text-destructive">存在错误</span>
+          )}
+        </div>
+        <div className="flex shrink-0 items-center gap-4">
+          {expanded && (
+            <>
+              {/* 自动滚动开关 */}
+              <div className="flex items-center gap-2">
+                <Switch id={autoScrollId} checked={autoScroll} onCheckedChange={setAutoScroll} />
+                <label
+                  htmlFor={autoScrollId}
+                  className="text-xs text-muted-foreground cursor-pointer select-none"
+                >
+                  自动滚动
+                </label>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setLogMessages([])
+                  scrollToBottom()
+                }}
+                className="text-xs h-7 px-2 text-muted-foreground hover:text-destructive"
+              >
+                清空
+              </Button>
+            </>
+          )}
+          {canCollapse && (
+            <Button
+              data-testid="global-log-toggle"
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-7 px-2 text-xs text-muted-foreground"
+              aria-expanded={expanded}
+              aria-controls={logContentId}
+              onClick={toggleExpanded}
+            >
+              {expanded ? <ChevronDownIcon /> : <ChevronUpIcon />}
+              {expanded ? '收起' : '展开'}
+            </Button>
+          )}
         </div>
       </div>
 
-      {/* 日志内容 */}
-      <ScrollArea ref={scrollAreaRef} className="flex-1">
-        <div className="p-4 font-mono text-sm">
-          {logMessages.map((log, index) => (
-            <LogItem key={log.id} log={log} index={index} />
-          ))}
-        </div>
-      </ScrollArea>
+      {expanded ? (
+        <ScrollArea ref={scrollAreaRef} className="flex-1" id={logContentId}>
+          <div className="p-4 font-mono text-sm">
+            {logMessages.map((log, index) => (
+              <LogItem key={log.id} log={log} index={index} />
+            ))}
+          </div>
+        </ScrollArea>
+      ) : null}
     </div>
   )
 }

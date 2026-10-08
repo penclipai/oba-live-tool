@@ -14,14 +14,18 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && electron-builder --publish never",
+    "build:relay": "node ./scripts/build-relay.mjs",
+    "build:app": "tsc && vite build",
+    "build": "pnpm build:relay && pnpm build:app && electron-builder --publish never",
     "preview": "vite preview",
-    "pretest": "vite build --mode=test",
-    "test": "vitest run",
+    "test": "node --import tsx --test tests/*.test.mjs",
     "prepare": "husky",
     "bump": "bumpp --no-commit --no-tag --no-push && changelogen --output",
     "release": "node ./scripts/release",
-    "slow-server": "node ./scripts/slow-server.js"
+    "slow-server": "node ./scripts/slow-server.js",
+    "test:relay:e2e": "node scripts/test-relay-e2e.mjs",
+    "test:relay:installer": "node scripts/test-relay-installer.mjs",
+    "test:relay:stability": "node scripts/test-video-box-stability.mjs"
   },
   "dependencies": {
     "electron-updater": "6.6.2",

@@ -7,12 +7,6 @@
   },
   "electronLanguages": ["zh-CN", "en-US"],
   "files": ["dist-electron", "dist"],
-  "extraResources": [
-    {
-      "from": "resources/video-box",
-      "to": "video-box"
-    }
-  ],
   "mac": {
     "artifactName": "${productName}_${version}_macos_${arch}.${ext}",
     "target": [
@@ -24,6 +18,13 @@
     "icon": "public/favicon.png"
   },
   "win": {
+    "extraResources": [
+      {
+        "from": "build/video-box-runtime",
+        "to": "video-box",
+        "filter": ["video-box.exe", "_internal/**", "LICENSE.txt", "NOTICE.txt", "README.txt"]
+      }
+    ],
     "target": [
       {
         "target": "nsis",

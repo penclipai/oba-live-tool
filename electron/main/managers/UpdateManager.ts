@@ -12,6 +12,7 @@ import * as yaml from 'yaml'
 import windowManager from '#/windowManager'
 import packageJson from '../../../package.json'
 import { createLogger } from '../logger'
+import { videoRelayService } from '../services/VideoRelayService'
 import { errorMessage, sleep } from '../utils'
 
 type LatestYml = {
@@ -199,6 +200,7 @@ class UpdateManager {
 
   public async quitAndInstall() {
     logger.info('准备退出并安装更新')
+    await videoRelayService.cleanup()
     this.updater.quitAndInstall()
   }
 }

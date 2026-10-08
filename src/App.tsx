@@ -1,5 +1,5 @@
 import { RefreshCwIcon, TerminalIcon } from 'lucide-react'
-import { Outlet } from 'react-router'
+import { Outlet, useMatch } from 'react-router'
 import { IPC_CHANNELS } from 'shared/ipcChannels'
 import LogDisplayer from '@/components/common/LogDisplayer'
 import Sidebar from '@/components/common/Sidebar'
@@ -15,7 +15,7 @@ import { useDevMode } from '@/hooks/useDevMode'
 import { Header } from './components/common/Header'
 import { useIpcListener } from './hooks/useIpc'
 import './App.css'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { UpdateDialog } from './components/update/UpdateDialog'
 import { useAccounts } from './hooks/useAccounts'
 import { useAutoMessageStore } from './hooks/useAutoMessage'
@@ -80,6 +80,8 @@ function useGlobalIpcListener() {
 function App() {
   const { enabled: devMode } = useDevMode()
   const { accounts, currentAccountId } = useAccounts()
+  const [relayLogsExpanded, setRelayLogsExpanded] = useState(false)
+  const isRelayRoute = Boolean(useMatch('/relay'))
 
   useEffect(() => {
     const account = accounts.find(acc => acc.id === currentAccountId)
@@ -102,7 +104,13 @@ function App() {
     <>
       <ContextMenu>
         <ContextMenuTrigger disabled={!devMode} className="min-h-screen">
-          <div className="flex flex-col h-screen bg-gray-50">
+          <div
+            className={
+              isRelayRoute
+                ? 'flex flex-col h-screen bg-muted/30'
+                : 'flex flex-col h-screen bg-gray-50'
+            }
+          >
             {/* 头部标题 */}
             <Header />
 
@@ -112,14 +120,31 @@ function App() {
               <Sidebar />
 
               {/* 主要内容区域 */}
-              <main className="flex-1 overflow-y-auto p-8">
+              <main
+                className={
+                  isRelayRoute
+                    ? 'min-w-0 flex-1 overflow-y-auto p-4'
+                    : 'min-w-0 flex-1 overflow-y-auto p-8'
+                }
+              >
                 <Outlet />
               </main>
             </div>
 
             {/* 下半部分：日志显示器 */}
-            <div className="h-[180px] bg-white border-t shadow-inner">
-              <LogDisplayer />
+            <div
+              data-testid="global-logs"
+              className={
+                isRelayRoute && !relayLogsExpanded
+                  ? 'h-10 shrink-0 bg-white border-t shadow-inner transition-[height] duration-200 motion-reduce:transition-none'
+                  : 'h-[180px] shrink-0 bg-white border-t shadow-inner transition-[height] duration-200 motion-reduce:transition-none'
+              }
+            >
+              <LogDisplayer
+                collapsible={isRelayRoute}
+                expanded={isRelayRoute ? relayLogsExpanded : true}
+                onExpandedChange={setRelayLogsExpanded}
+              />
             </div>
           </div>
           <UpdateDialog />

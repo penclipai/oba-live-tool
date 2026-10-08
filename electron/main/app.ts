@@ -85,6 +85,8 @@ if (!app.requestSingleInstanceLock()) {
 }
 
 let win: BrowserWindow | null = null
+let quitCleanupPromise: Promise<void> | null = null
+let quitAfterCleanup = false
 const preload = path.join(__dirname, '../preload/index.mjs')
 const indexHtml = path.join(RENDERER_DIST, 'index.html')
 
@@ -143,8 +145,19 @@ app
 app.on('window-all-closed', async () => {
   win = null
   accountManager.cleanup()
-  await videoRelayService.cleanup()
   if (process.platform !== 'darwin') app.quit()
+})
+
+app.on('before-quit', event => {
+  if (quitAfterCleanup) return
+  event.preventDefault()
+  quitCleanupPromise ??= videoRelayService.cleanup().catch(error => {
+    createLogger('relay').error('转播服务退出清理失败', error)
+  })
+  void quitCleanupPromise.finally(() => {
+    quitAfterCleanup = true
+    app.quit()
+  })
 })
 
 app.on('second-instance', () => {

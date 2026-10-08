@@ -24,6 +24,12 @@ jobs:
         with:
           node-version: lts/*
 
+      - name: Setup Python for relay runtime
+        if: runner.os == 'Windows'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14.3'
+
       - name: install pnpm
         uses: pnpm/action-setup@v4
         with:
@@ -34,6 +40,13 @@ jobs:
 
       - name: build application
         run: pnpm build
+        if: runner.os == 'Windows'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: build macOS application
+        run: pnpm build:app && pnpm exec electron-builder --publish never
+        if: runner.os == 'macOS'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

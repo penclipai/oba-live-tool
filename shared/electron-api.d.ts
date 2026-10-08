@@ -112,7 +112,7 @@ export interface IpcChannels {
     message?: string
     error?: string
   }>
-  [IPC_CHANNELS.tasks.relay.openPanel]: () => Promise<boolean>
+  [IPC_CHANNELS.tasks.relay.openPanel]: () => Promise<{ ok: boolean; error?: string }>
 
   // Updater
   [IPC_CHANNELS.updater.checkUpdate]: () => Promise<
@@ -206,6 +206,8 @@ export interface RelayLogEntry {
 }
 
 export interface RelayStatusPayload {
+  service_id: 'oba-video-relay'
+  protocol_version: 1
   settings: RelaySettings
   result: RelayResolveResult | null
   active_clients: number
@@ -223,6 +225,17 @@ export interface RelayServiceStatus {
   serviceRunning: boolean
   resourceReady: boolean
   panelUrl: string
+  state: 'stopped' | 'starting' | 'running' | 'stopping' | 'unknown'
   error?: string
+  errorCode?:
+    | 'unsupported'
+    | 'resource-missing'
+    | 'refused'
+    | 'timeout'
+    | 'http'
+    | 'invalid-service'
+    | 'startup'
+    | 'operation'
+    | 'shell'
   data?: RelayStatusPayload
 }

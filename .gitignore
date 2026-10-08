@@ -45,4 +45,10 @@ coverage/
 .claude
 
 /resources/video-box/
+/build/
+/vendor/video-box/config/
+/vendor/video-box/logs/
+/vendor/video-box/local_proxy/logs/
+/vendor/video-box/**/__pycache__/
+/vendor/video-box/**/*.py[cod]
 .omx

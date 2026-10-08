@@ -218,6 +218,18 @@ class HlsRewriteStabilityTests(unittest.TestCase):
 
 
 class HlsRangeTests(unittest.TestCase):
+    def setUp(self) -> None:
+        with server_module.STATE.lock:
+            self.original_enabled = server_module.STATE.stream_enabled
+            self.original_generation = server_module.STATE.stream_generation
+            server_module.STATE.stream_enabled = True
+            server_module.STATE.stream_generation = 0
+
+    def tearDown(self) -> None:
+        with server_module.STATE.lock:
+            server_module.STATE.stream_enabled = self.original_enabled
+            server_module.STATE.stream_generation = self.original_generation
+
     def test_proxy_binary_forwards_client_range_header(self) -> None:
         request = type("Request", (), {})()
         request.headers = {"Range": "bytes=128-255", "If-Range": "etag-1", "Cookie": "must-not-forward"}
@@ -305,6 +317,15 @@ class HlsRangeTests(unittest.TestCase):
 
 
 class HlsSignedUrlTests(unittest.TestCase):
+    def setUp(self) -> None:
+        with server_module.STATE.lock:
+            self.original_enabled = server_module.STATE.stream_enabled
+            server_module.STATE.stream_enabled = True
+
+    def tearDown(self) -> None:
+        with server_module.STATE.lock:
+            server_module.STATE.stream_enabled = self.original_enabled
+
     def test_hls_proxy_decodes_the_signed_url_parameter_exactly_once(self) -> None:
         upstream = "https://pull.example.test/segment.ts?token=a%2Fb%2Bc%25"
         seen: list[str] = []

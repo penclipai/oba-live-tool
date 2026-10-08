@@ -246,7 +246,7 @@ class StreamSelectionTests(unittest.TestCase):
                     "pull_data": {
                         "stream_data": (
                             '{"data":{"origin":{"main":{"sdk_params":"'
-                            '{\\"VCodec\\":\\"h264\\",\\"resolution\\":\\"1920x1080\\"}' 
+                            '{\\"VCodec\\":\\"h264\\",\\"resolution\\":\\"1920x1080\\"}'
                             '"}}}}'
                         )
                     }
